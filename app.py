@@ -6,16 +6,18 @@ class post_schema(BaseModel):
     age: int
 
 app = FastAPI()
+content= {"Hello": "World"}
 
 @app.get("/")
-def users():
+async def users():
     return {"Hello": "World"}
 
 @app.get("/users")
-def users():
+async def users():
     return {"testing": "data"}
 
 @app.post("/post")
-def create_item(post: post_schema):
-    post_dictionary = post.dict()
-    return post_dictionary
+async def create_item(post: post_schema):
+    post_dictionary = post.model_dump()
+    
+    return "Title is {} and Age is {} and content is {}".format(post_dictionary['title'],post_dictionary['age'],content)
