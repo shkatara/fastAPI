@@ -6,7 +6,7 @@ class post_schema(BaseModel):
     age: int
 
 app = FastAPI()
-content= {"Hello": "World"}
+content= {"Hello": "World","Old": "data"}
 
 @app.get("/")
 async def users():
