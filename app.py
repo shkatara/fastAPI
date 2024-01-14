@@ -35,7 +35,7 @@ content= [
 def find_post_by_id(passed_id):
     for data in content:
         if data['id'] == passed_id:
-            return data
+            return data,content.index(data)
             
 
 @app.get("/")
@@ -55,7 +55,7 @@ async def post_by_id(passed_id: int, status_code: Response):
             "msg": "Not Found",
             "status_code": status.HTTP_404_NOT_FOUND
         }
-    return post
+    return post[0]
 
 @app.post("/createpost",status_code=status.HTTP_201_CREATED)
 async def create_item(post: post_schema):
@@ -74,8 +74,17 @@ def delete_post(passed_id: int):
         }
     content.remove(post)
     return content
-        
 
+@app.put("/update/{passed_id}",status_code=status.HTTP_200_OK)
+def update(post: post_schema, passed_id: int):
+    find_index = find_post_by_id(passed_id)
+    post_index = find_index[1]
+#    return post_index,post.model_dump()
+    content[post_index] = post.model_dump()
+    content[post_index]['id'] = passed_id
+    return content
+    
+    
     #content.remove(passed_id)
     #return content
     #get post first
