@@ -87,4 +87,4 @@ def update(post: post_schema, passed_id: int):
 
 if __name__ == "__main__":
     find_post_by_id(1)
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8080)
