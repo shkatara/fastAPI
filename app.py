@@ -79,15 +79,11 @@ def delete_post(passed_id: int):
 def update(post: post_schema, passed_id: int):
     find_index = find_post_by_id(passed_id)
     post_index = find_index[1]
-#    return post_index,post.model_dump()
     content[post_index] = post.model_dump()
     content[post_index]['id'] = passed_id
     return content
-    
-    
-    #content.remove(passed_id)
-    #return content
-    #get post first
+
+#Put requires to give entire keys. Try patch to only change one key or keys
 
 if __name__ == "__main__":
     find_post_by_id(1)
