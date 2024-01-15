@@ -1,4 +1,5 @@
 from fastapi import FastAPI,Request,Response,status
+#Request from fastAPI contains the JSON data that can be used for retrieving what user had given. This is similar to fetching data from a HTTP_METHOD request in PHP that I worked on storastack
 from pydantic import BaseModel
 import uvicorn
 from random import randrange
@@ -84,7 +85,6 @@ def update(post: post_schema, passed_id: int):
     return content
 
 @app.patch("/patch_post_title/{passed_id}",status_code=status.HTTP_200_OK)
-#Request from fastAPI contains the JSON data that can be used for retrieving what user had given. This is similar to fetching data from a HTTP_METHOD request in PHP that I worked on storastack
 
 async def patch(passed_id: int, request_patch: Request):
     request_data = await request_patch.json()
