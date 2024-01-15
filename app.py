@@ -94,10 +94,6 @@ async def patch(passed_id: int, request_patch: Request):
    
     return content
 
-
-
-#Put requires to give entire keys. Try patch to only change one key or keys
-
 if __name__ == "__main__":
     find_post_by_id(1)
     uvicorn.run(app, host="0.0.0.0", port=8080)
