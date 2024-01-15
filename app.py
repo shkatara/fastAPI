@@ -83,6 +83,20 @@ def update(post: post_schema, passed_id: int):
     content[post_index]['id'] = passed_id
     return content
 
+@app.patch("/patch_post_title/{passed_id}",status_code=status.HTTP_200_OK)
+#Request from fastAPI contains the JSON data that can be used for retrieving what user had given. This is similar to fetching data from a HTTP_METHOD request in PHP that I worked on storastack
+
+async def patch(passed_id: int, request_patch: Request):
+    request_data = await request_patch.json()
+    new_title =  request_data['title']
+    find_index = find_post_by_id(passed_id)
+    post_index = find_index[1]
+    content[post_index]['title'] = new_title
+   
+    return content
+
+
+
 #Put requires to give entire keys. Try patch to only change one key or keys
 
 if __name__ == "__main__":
