@@ -85,7 +85,6 @@ def update(post: post_schema, passed_id: int):
     return content
 
 @app.patch("/patch_post_title/{passed_id}",status_code=status.HTTP_200_OK)
-
 async def patch(passed_id: int, request_patch: Request):
     request_data = await request_patch.json()
     new_title =  request_data['title']
