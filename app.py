@@ -86,13 +86,17 @@ def update(post: post_schema, passed_id: int):
 
 @app.patch("/patch_post_title/{passed_id}",status_code=status.HTTP_200_OK)
 async def patch(passed_id: int, request_patch: Request):
-    request_data = await request_patch.json()
-    new_title =  request_data['title']
     find_index = find_post_by_id(passed_id)
     post_index = find_index[1]
-    content[post_index]['title'] = new_title
-   
-    return content
+    request_data = await request_patch.json()
+    for k,v in request_data.items():
+        if k == "title":
+            content[post_index]['title'] =  request_data['title']
+        if k == "age":
+            content[post_index]['age'] =  request_data['age']
+        if k == "testingdata":
+            content[post_index]['testingdata'] =  request_data['testingdata']
+    return content[post_index]
 
 if __name__ == "__main__":
     find_post_by_id(1)
