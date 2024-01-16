@@ -3,6 +3,32 @@ from fastapi import FastAPI,Request,Response,status
 from pydantic import BaseModel
 import uvicorn
 from random import randrange
+import mysql.connector 
+import sys
+
+import os
+from dotenv import load_dotenv
+
+#Load environment values from .env file
+load_dotenv()
+db_pass = os.getenv('DB_PASSW')
+#Connect to mysql database
+conn = mysql.connector.connect(
+    host=os.getenv('DB_HOST'), 
+    user=os.getenv('DB_USER'),
+    password="redhat123" #Not the greatest idea to put password in plain text but for some reason os.getenv('DB_PASSW') is reading the password but the function
+    #is not accepting it.
+)
+
+if not conn:
+
+    sys.exit("Database Connection Failed...")
+else:
+    print("Databases Connection Successful..")
+
+
+
+
 
 class post_schema(BaseModel):
     title: str
@@ -118,5 +144,4 @@ async def patch(passed_id: int, request_patch: Request):
         
 
 if __name__ == "__main__":
-    find_post_by_id(1)
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run("main:app", host="127.0.0.1", port=8080, reload=True)
