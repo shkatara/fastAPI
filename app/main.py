@@ -116,7 +116,20 @@ async def create_item(post: post_schema):
     cursor = connection.cursor()
     #Create query
     query = f'INSERT INTO {os.getenv("DB_TABLE_NAME")} (title,age,firstname,lastname,content) VALUES ("{post_json["title"]}",{post_json["age"]},"{post_json["firstname"]}","{post_json["lastname"]}","{post_json["content"]}")'
-
+    #run query
+    exec_result = cursor.execute(query)
+    if exec_result == None:
+        connection.commit()
+        cursor.close()
+        connection.close()
+        return {
+            "msg":"Data Added Successfully"
+        }
+    else:
+        status_code = status.HTTP_408_REQUEST_TIMEOUT
+        return {
+            "Msg":" Could not add data."
+            }
 
 @app.delete("/delete/post/{passed_id}")
 def delete_post(passed_id: int,status_code: Response):
