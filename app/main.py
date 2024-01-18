@@ -60,9 +60,11 @@ content= [
 
 def find_post(*args):
     final_results = []
-    query_with_id = f'select * from {os.getenv("DB_TABLE_NAME")} where id={args[0]}'
-    query_all = f'select * from {os.getenv("DB_TABLE_NAME")}'
-    query_execute = conn.execute(query_with_id) if len(args) != 0 else conn.execute(query_all) 
+    if len(args) != 0:
+        query = f'select * from {os.getenv("DB_TABLE_NAME")} where id={args[0]}'
+    else:
+        query = f'select * from {os.getenv("DB_TABLE_NAME")}'
+    query_execute = conn.execute(query) 
     result = conn.fetchall()
     if result != 0:
         for data in result:
