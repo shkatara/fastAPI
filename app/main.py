@@ -91,8 +91,13 @@ async def users():
 @app.get("/post/{passed_id}", status_code=status.HTTP_200_OK)
 async def post_by_id(passed_id: int, status_code: Response):
     final_results = find_post(passed_id)
-    print(len(final_results))
-    return final_results
+    if len(final_results) != 0:
+        return final_results
+    else:
+        return {
+            "msg":"No Post Found"
+        }
+
     
 
 @app.post("/createpost",status_code=status.HTTP_201_CREATED)
