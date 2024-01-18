@@ -79,7 +79,9 @@ def find_post_in_db(*args):
 
 @app.get("/")
 async def users():
-    return {"Hello": "World"}
+    return {
+        "Hello": "World"
+    }
 
 @app.get("/list_posts")
 async def users():
@@ -104,7 +106,17 @@ async def post_by_id(passed_id: int, status_code: Response):
 
 @app.post("/createpost",status_code=status.HTTP_201_CREATED)
 async def create_item(post: post_schema):
-    
+    post_json = post.model_dump()
+    #Create database connection
+    connection = connect(host=os.getenv('DB_HOST'), user=os.getenv('DB_USER'),database=os.getenv('DB_NAME'),password="redhat123")
+    #Check if connection
+    if not connection:
+        sys.exit("Database not initialized. Exited...!!!")
+    #create cursor
+    cursor = connection.cursor()
+    #Create query
+    query = f'INSERT INTO {os.getenv("DB_TABLE_NAME")} (title,age,firstname,lastname,content) VALUES ("{post_json["title"]}",{post_json["age"]},"{post_json["firstname"]}","{post_json["lastname"]}","{post_json["content"]}")'
+
 
 @app.delete("/delete/post/{passed_id}")
 def delete_post(passed_id: int,status_code: Response):
