@@ -94,6 +94,7 @@ async def post_by_id(passed_id: int, status_code: Response):
     if len(final_results) != 0:
         return final_results
     else:
+        status_code.status_code = status.HTTP_404_NOT_FOUND
         return {
             "msg":"No Post Found"
         }
