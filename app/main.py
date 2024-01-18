@@ -12,23 +12,6 @@ from dotenv import load_dotenv
 #Load environment values from .env file
 load_dotenv()
 
-#Connect to mysql database
-connection = connect(
-    host=os.getenv('DB_HOST'), 
-    user=os.getenv('DB_USER'),
-    database=os.getenv('DB_NAME'),
-    password="redhat123" #Not the greatest idea to put password in plain text but for some reason os.getenv('DB_PASSW') is reading the password but the function
-    #is not accepting it.
-)
-
-if not connection:
-    sys.exit("Database not initialized. Exited...!!!")
-
-#Create database cursor
-conn = connection.cursor()
-
-
-
 class post_schema(BaseModel):
     title: str
     age: int
@@ -59,13 +42,19 @@ content= [
 ]
 
 def find_post_in_db(*args):
+    connection = connect(host=os.getenv('DB_HOST'), user=os.getenv('DB_USER'),database=os.getenv('DB_NAME'),password="redhat123")
+    if not connection:
+        sys.exit("Database not initialized. Exited...!!!")
+
+    cursor = connection.cursor()
     final_results = []
     if len(args) != 0:
         query = f'select * from {os.getenv("DB_TABLE_NAME")} where id={args[0]}'
     else:
         query = f'select * from {os.getenv("DB_TABLE_NAME")}'
-    query_execute = conn.execute(query) 
-    result = conn.fetchall()
+    print(query)
+    query_execute = cursor.execute(query) 
+    result = cursor.fetchall()
     if result != 0:
         for data in result:
             final_results = final_results + [
@@ -75,9 +64,14 @@ def find_post_in_db(*args):
                 "Last name": data[4],
                 "content": data[5]
             }  ]
+        cursor.close()
+        connection.close()
+
     else:
+        cursor.close()
+        connection.close()
         return {
-            "msg":"No Post Found"
+            "msg":" No Post Found"
         }
     return final_results
 
@@ -88,7 +82,12 @@ async def users():
 @app.get("/list_posts")
 async def users():
     final_results = find_post_in_db()
-    return final_results
+    if len(final_results) != 0:
+        return final_results
+    else:
+        return {
+            "msg":"No Post Found"
+        }
 
 @app.get("/post/{passed_id}", status_code=status.HTTP_200_OK)
 async def post_by_id(passed_id: int, status_code: Response):
