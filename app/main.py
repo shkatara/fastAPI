@@ -58,7 +58,7 @@ content= [
     }
 ]
 
-def find_post(*args):
+def find_post_in_db(*args):
     final_results = []
     if len(args) != 0:
         query = f'select * from {os.getenv("DB_TABLE_NAME")} where id={args[0]}'
@@ -87,12 +87,12 @@ async def users():
 
 @app.get("/list_posts")
 async def users():
-    final_results = find_post()
+    final_results = find_post_in_db()
     return final_results
 
 @app.get("/post/{passed_id}", status_code=status.HTTP_200_OK)
 async def post_by_id(passed_id: int, status_code: Response):
-    final_results = find_post(passed_id)
+    final_results = find_post_in_db(passed_id)
     if len(final_results) != 0:
         return final_results
     else:
@@ -100,8 +100,6 @@ async def post_by_id(passed_id: int, status_code: Response):
         return {
             "msg":"No Post Found"
         }
-
-    
 
 @app.post("/createpost",status_code=status.HTTP_201_CREATED)
 async def create_item(post: post_schema):
