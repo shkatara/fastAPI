@@ -15,7 +15,9 @@ load_dotenv()
 class post_schema(BaseModel):
     title: str
     age: int
-    testingdata: str
+    firstname: str
+    lastname: str
+    content: str
     #id: int
 
 app = FastAPI()
@@ -102,12 +104,7 @@ async def post_by_id(passed_id: int, status_code: Response):
 
 @app.post("/createpost",status_code=status.HTTP_201_CREATED)
 async def create_item(post: post_schema):
-    post_dictionary = post.model_dump()
-    post_dictionary['id'] = randrange(0,1000000)
-    content.append(post_dictionary)
-    return {
-        "msg": "data added successfully"
-        }
+    
 
 @app.delete("/delete/post/{passed_id}")
 def delete_post(passed_id: int,status_code: Response):
