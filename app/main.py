@@ -3,7 +3,7 @@ from fastapi import FastAPI,Request,Response,status
 from pydantic import BaseModel
 import uvicorn
 from random import randrange
-import mysql.connector 
+from mysql.connector import connect
 import sys
 
 import os
@@ -11,22 +11,21 @@ from dotenv import load_dotenv
 
 #Load environment values from .env file
 load_dotenv()
-db_pass = os.getenv('DB_PASSW')
+
 #Connect to mysql database
-conn = mysql.connector.connect(
+connection = connect(
     host=os.getenv('DB_HOST'), 
     user=os.getenv('DB_USER'),
+    database=os.getenv('DB_NAME'),
     password="redhat123" #Not the greatest idea to put password in plain text but for some reason os.getenv('DB_PASSW') is reading the password but the function
     #is not accepting it.
 )
 
-if not conn:
+if not connection:
+    sys.exit("Database not initialized. Exited...!!!")
 
-    sys.exit("Database Connection Failed...")
-else:
-    print("Databases Connection Successful..")
-
-
+#Create database cursor
+conn = connection.cursor()
 
 
 
@@ -59,11 +58,26 @@ content= [
     }
 ]
 
-def find_post_by_id(passed_id):
-    for data in content:
-        if data['id'] == passed_id:
-            return data,content.index(data)
-            
+def find_post(*args):
+    final_results = []
+    query_with_id = f'select * from {os.getenv("DB_TABLE_NAME")} where id={args[0]}'
+    query_all = f'select * from {os.getenv("DB_TABLE_NAME")}'
+    query_execute = conn.execute(query_with_id) if len(args) != 0 else conn.execute(query_all) 
+    result = conn.fetchall()
+    if result != 0:
+        for data in result:
+            final_results = final_results + [
+            {
+                "title": data[1],
+                "First Name": data[3],
+                "Last name": data[4],
+                "content": data[5]
+            }  ]
+    else:
+        return {
+            "msg":"No Post Found"
+        }
+    return final_results
 
 @app.get("/")
 async def users():
@@ -71,19 +85,15 @@ async def users():
 
 @app.get("/list_posts")
 async def users():
-    return content
+    final_results = find_post()
+    return final_results
 
 @app.get("/post/{passed_id}", status_code=status.HTTP_200_OK)
 async def post_by_id(passed_id: int, status_code: Response):
-    find_index = find_post_by_id(passed_id)
-
-    if find_index == None:
-        status_code.status_code = status.HTTP_404_NOT_FOUND
-        return {
-            "msg": "Not Found",
-            "status_code": status.HTTP_404_NOT_FOUND
-        }
-    return find_index[0]
+    final_results = find_post(passed_id)
+    print(len(final_results))
+    return final_results
+    
 
 @app.post("/createpost",status_code=status.HTTP_201_CREATED)
 async def create_item(post: post_schema):
