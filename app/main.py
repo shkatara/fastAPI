@@ -133,17 +133,19 @@ async def create_item(post: post_schema):
 
 @app.delete("/delete/post/{passed_id}")
 def delete_post(passed_id: int,status_code: Response):
-    find_index = find_post_by_id(passed_id)
+    #Create database connection
+    connection = connect(host=os.getenv('DB_HOST'), user=os.getenv('DB_USER'),database=os.getenv('DB_NAME'),password="redhat123")
+    #Check if connection
+    if not connection:
+        sys.exit("Database not initialized. Exited...!!!")
+    #create cursor
+    cursor = connection.cursor()
+    #Create query
+    query = f'DELTE FROM {os.getenv("DB_TABLE_NAME")} where id={passed_id}'
+    #run query
+    exec_result = cursor.execute(query)
+    return exec_result
 
-    if find_index == None:
-        status_code.status_code = status.HTTP_404_NOT_FOUND
-        return {
-            "msg": "post not found",
-            "status_code": status_code.status_code
-        }
-    else:
-        content.remove(find_index[0])
-        return content
     
 @app.put("/update/{passed_id}",status_code=status.HTTP_200_OK)
 def update(post: post_schema, passed_id: int):
