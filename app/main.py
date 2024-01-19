@@ -171,6 +171,8 @@ def update(post: post_schema, passed_id: int):
     #create cursor
     cursor = connection.cursor()
     #Create query
+
+    #TODO: Check if the post is existing first, and if it does then only update it 
     query = f'UPDATE {os.getenv("DB_TABLE_NAME")} SET title="{post_json["title"]}",age={post_json["age"]},firstname="{post_json["firstname"]}",lastname="{post_json["lastname"]}",content="{post_json["content"]}" where id={passed_id}'
     print(query)
     exec_result = cursor.execute(query)
