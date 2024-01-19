@@ -54,7 +54,6 @@ def find_post_in_db(*args):
         query = f'select * from {os.getenv("DB_TABLE_NAME")} where id={args[0]}'
     else:
         query = f'select * from {os.getenv("DB_TABLE_NAME")}'
-    print(query)
     query_execute = cursor.execute(query) 
     result = cursor.fetchall()
     if result != 0:
@@ -141,26 +140,53 @@ def delete_post(passed_id: int,status_code: Response):
     #create cursor
     cursor = connection.cursor()
     #Create query
-    query = f'DELTE FROM {os.getenv("DB_TABLE_NAME")} where id={passed_id}'
+    query = f'DELETE FROM {os.getenv("DB_TABLE_NAME")} where id={passed_id}'
     #run query
     exec_result = cursor.execute(query)
-    return exec_result
+    #return exec_result
+    if exec_result == None:
+        connection.commit()
+        cursor.close()
+        connection.close()
+        return {
+            "msg": "Data Deleted Successfully (!if Existed)"
+        }
+    else:
+        status_code.status_code = status.HTTP_202_ACCEPTED
+        return {
+            "Msg":" Could not delete post"
+            }
+
+
 
     
 @app.put("/update/{passed_id}",status_code=status.HTTP_200_OK)
 def update(post: post_schema, passed_id: int):
-    find_index = find_post_by_id(passed_id)
-
-    if find_index == None:
+    post_json = post.model_dump()
+    #Create database connection
+    connection = connect(host=os.getenv('DB_HOST'), user=os.getenv('DB_USER'),database=os.getenv('DB_NAME'),password="redhat123")
+    #Check if connection
+    if not connection:
+        sys.exit("Database not initialized. Exited...!!!")
+    #create cursor
+    cursor = connection.cursor()
+    #Create query
+    query = f'UPDATE TABLE {os.getenv("DB_TABLE_NAME")} SET title={post_json["title"]},age={post_json["age"]},firstname={post_json["firstname"]},lastname={post_json["lastname"]},content={post_json["content"]}'
+    #run query
+    exec_result = cursor.execute(query)
+    return exec_result
+    if exec_result == None:
+        connection.commit()
+        cursor.close()
+        connection.close()
         return {
-            "msg": "Post not found"
+            "msg": "Data Deleted Successfully (!if Existed)"
         }
-        
     else:
-        post_index = find_index[1]
-        content[post_index] = post.model_dump()
-        content[post_index]['id'] = passed_id
-        return content[post_index]
+        status_code.status_code = status.HTTP_202_ACCEPTED
+        return {
+            "Msg":" Could not delete post"
+            }
 
 @app.patch("/patch_post_title/{passed_id}",status_code=status.HTTP_200_OK)
 async def patch(passed_id: int, request_patch: Request):
