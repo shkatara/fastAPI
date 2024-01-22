@@ -191,58 +191,42 @@ def update(post: post_schema, passed_id: int):
 
 @app.patch("/patch_post_title/{passed_id}",status_code=status.HTTP_200_OK)
 async def patch(passed_id: int, request_patch: Request):
-    keys_in_request = []
-    keys_in_database = []
+    sql_statements = []
     request_data = await request_patch.json() #contains the post body. Is a map. 
-    #fetch keys in database;
-    fetch_database_keys = "select column_name from INFORMATION_SCHEMA.COLUMNS where TABLE_Name='posts' order by ORDINAL_POSITION"
 
-    connection = connect(host=os.getenv('DB_HOST'), user=os.getenv('DB_USER'),database=os.getenv('DB_NAME'),password="redhat123")
-    #Check if connection
-    if not connection:
-        sys.exit("Database not initialized. Exited...!!!")
-    #create cursor
-    cursor = connection.cursor()
-    #Create query
-    #run query
-    exec_result = cursor.execute(fetch_database_keys)
-    result = cursor.fetchall()
-    new_list = []
+    for k,v in request_data.items():
+        if k == "age":
+            sql_statements = sql_statements +  [f'update posts set {k} = {v} where id={passed_id}']
+        else:
+            sql_statements = sql_statements +  [f'update posts set {k} = "{v}" where id={passed_id}']
 
-    for i in result:
-        new_list = new_list + [i]
-    return new_list
+
+    failed = 0
+
+    for sql_query in sql_statements:
+        print(sql_query)
+        connection = connect(host=os.getenv('DB_HOST'), user=os.getenv('DB_USER'),database=os.getenv('DB_NAME'),password="redhat123")
+        cursor = connection.cursor()
+        exec_result = cursor.execute(sql_query)
+
+        if exec_result == None:
+            connection.commit()
+            cursor.close()
+            connection.close()
+            failed == 0
+            continue 
+        else:
+            failed == 1
     
-        
-    post_json = ost.model_dump()
-    #Create database connection
-    connection = connect(host=os.getenv('DB_HOST'), user=os.getenv('DB_USER'),database=os.getenv('DB_NAME'),password="redhat123")
-    #Check if connection
-    if not connection:
-        sys.exit("Database not initialized. Exited...!!!")
-    #create cursor
-    cursor = connection.cursor()
-    #Create query
-
-    #TODO: Check if the post is existing first, and if it does then only update it 
-    query = f'UPDATE {os.getenv("DB_TABLE_NAME")} SET title="{post_json["title"]}",age={post_json["age"]},firstname="{post_json["firstname"]}",lastname="{post_json["lastname"]}",content="{post_json["content"]}" where id={passed_id}'
-    print(query)
-    exec_result = cursor.execute(query)
-    if exec_result == None:
-        connection.commit()
-        cursor.close()
-        connection.close()
+    if failed:
         return {
-            "msg": "Data Updated Successfully"
+            "msg": "Error updating post"
         }
     else:
-        status_code.status_code = status.HTTP_202_ACCEPTED
         return {
-            "Msg":" Could not update post"
-            }
+            "msg": "Post Updated fine"
+        }
     
-
-
 
 
 
