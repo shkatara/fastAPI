@@ -191,23 +191,64 @@ def update(post: post_schema, passed_id: int):
 
 @app.patch("/patch_post_title/{passed_id}",status_code=status.HTTP_200_OK)
 async def patch(passed_id: int, request_patch: Request):
-    find_index = find_post_by_id(passed_id)
-    request_data = await request_patch.json()
+    keys_in_request = []
+    keys_in_database = []
+    request_data = await request_patch.json() #contains the post body. Is a map. 
+    #fetch keys in database;
+    fetch_database_keys = "select column_name from INFORMATION_SCHEMA.COLUMNS where TABLE_Name='posts' order by ORDINAL_POSITION"
 
-    if find_index == None:
-        status_code = status.HTTP_404_NOT_FOUND
-        return {"msg":"Post not found"}
-    else:
-        post_index = find_index[1]
-        for k,v in request_data.items():
-            if k == "title":
-                content[post_index]['title'] =  request_data['title']
-            if k == "age":
-                content[post_index]['age'] =  request_data['age']
-            if k == "testingdata":
-                content[post_index]['testingdata'] =  request_data['testingdata']
-        return content[post_index]
+    connection = connect(host=os.getenv('DB_HOST'), user=os.getenv('DB_USER'),database=os.getenv('DB_NAME'),password="redhat123")
+    #Check if connection
+    if not connection:
+        sys.exit("Database not initialized. Exited...!!!")
+    #create cursor
+    cursor = connection.cursor()
+    #Create query
+    #run query
+    exec_result = cursor.execute(fetch_database_keys)
+    result = cursor.fetchall()
+    new_list = []
+
+    for i in result:
+        new_list = new_list + [i]
+    return new_list
+    
         
+    post_json = ost.model_dump()
+    #Create database connection
+    connection = connect(host=os.getenv('DB_HOST'), user=os.getenv('DB_USER'),database=os.getenv('DB_NAME'),password="redhat123")
+    #Check if connection
+    if not connection:
+        sys.exit("Database not initialized. Exited...!!!")
+    #create cursor
+    cursor = connection.cursor()
+    #Create query
 
+    #TODO: Check if the post is existing first, and if it does then only update it 
+    query = f'UPDATE {os.getenv("DB_TABLE_NAME")} SET title="{post_json["title"]}",age={post_json["age"]},firstname="{post_json["firstname"]}",lastname="{post_json["lastname"]}",content="{post_json["content"]}" where id={passed_id}'
+    print(query)
+    exec_result = cursor.execute(query)
+    if exec_result == None:
+        connection.commit()
+        cursor.close()
+        connection.close()
+        return {
+            "msg": "Data Updated Successfully"
+        }
+    else:
+        status_code.status_code = status.HTTP_202_ACCEPTED
+        return {
+            "Msg":" Could not update post"
+            }
+    
+
+
+
+
+
+
+
+
+    
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8080, reload=True)
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
