@@ -95,10 +95,17 @@ async def post_by_id(passed_id: int, status_code: Response):
 @app.post("/createpost",status_code=status.HTTP_201_CREATED)
 async def create_item(post: post_schema):
     post_json = post.model_dump()
-    #Insert data to posts table
-    insert = posts_table.insert().values(title=post_json['title'],firstname=post_json['firstname'],lastname=post_json['lastname'],content=post_json['content'])
-    return insert
-   
+    insert_sql_statement = posts_table.insert().values(title=post_json['title'],firstname=post_json['firstname'],lastname=post_json['lastname'],content=post_json['content'])
+    sql_execute_result = conn.execute(insert_sql_statement)
+    commit = conn.commit()
+    if commit == None:
+        return {
+            "msg": "Data inserted successfully"
+        }
+    else:
+        return {
+            "msg": "Data not inserted successfully"
+        }
 
 @app.delete("/delete/post/{passed_id}")
 def delete_post(passed_id: int,status_code: Response):
