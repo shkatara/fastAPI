@@ -32,38 +32,12 @@ posts_table = Table('posts',posts_table_meta,Column('id', Integer, primary_key=T
 posts_table_meta.create_all(engine)
 
 
-def find_post_in_db(*args):
-    connection = connect(host=os.getenv('DB_HOST'), user=os.getenv('DB_USER'),database=os.getenv('DB_NAME'),password="redhat123")
-    if not connection:
-        sys.exit("Database not initialized. Exited...!!!")
-
-    cursor = connection.cursor()
-    final_results = []
-    if len(args) != 0:
-        query = f'select * from {os.getenv("DB_TABLE_NAME")} where id={args[0]}'
-    else:
-        query = f'select * from {os.getenv("DB_TABLE_NAME")}'
-    query_execute = cursor.execute(query) 
-    result = cursor.fetchall()
-    if result != 0:
-        for data in result:
-            final_results = final_results + [
-            {
-                "title": data[1],
-                "First Name": data[3],
-                "Last name": data[4],
-                "content": data[5]
-            }  ]
-        cursor.close()
-        connection.close()
-
-    else:
-        cursor.close()
-        connection.close()
-        return {
-            "msg":" No Post Found"
-        }
-    return final_results
+def find_post_in_db(post_id):
+    select_sql_where_instruction = posts_table.select().where(posts_table.c.id == post_id)
+    exec_sql = conn.execute(select_sql_where_instruction).fetchone()
+    if exec_sql == None:
+        return {"msg": "Data not found"}
+    return list(exec_sql)
 
 @app.get("/")
 async def users():
@@ -82,14 +56,10 @@ def users():
 
 @app.get("/post/{passed_id}", status_code=status.HTTP_200_OK)
 async def post_by_id(passed_id: int, status_code: Response):
-    select_sql_instruction = posts_table.select().where(posts_table.c.id == passed_id)
-    exec_sql = conn.execute(select_sql_instruction).fetchone()
-    if exec_sql == None:
-        status_code.status_code = status.HTTP_404_NOT_FOUND
-        return {"msg": "Data not found"}
-    return list(exec_sql)  #exec_sql is a tuple and can not be returned using return. Hence need to convert it to list
-
-
+    post = find_post_in_db(passed_id)
+    return post
+  
+    
 @app.post("/createpost",status_code=status.HTTP_201_CREATED)
 async def create_item(post: post_schema):
     post_json = post.model_dump()
@@ -115,38 +85,15 @@ def delete_post(passed_id: int,status_code: Response):
         return {"msg": "Post Not deleted"}
     return {"msg": "Post Succesfully deleted"}
 
-
-
-
     
 @app.put("/update/{passed_id}",status_code=status.HTTP_200_OK)
 def update(post: post_schema, passed_id: int):
     post_json = post.model_dump()
-    #Create database connection
-    connection = connect(host=os.getenv('DB_HOST'), user=os.getenv('DB_USER'),database=os.getenv('DB_NAME'),password="redhat123")
-    #Check if connection
-    if not connection:
-        sys.exit("Database not initialized. Exited...!!!")
-    #create cursor
-    cursor = connection.cursor()
-    #Create query
-
-    #TODO: Check if the post is existing first, and if it does then only update it 
-    query = f'UPDATE {os.getenv("DB_TABLE_NAME")} SET title="{post_json["title"]}",age={post_json["age"]},firstname="{post_json["firstname"]}",lastname="{post_json["lastname"]}",content="{post_json["content"]}" where id={passed_id}'
-    print(query)
-    exec_result = cursor.execute(query)
-    if exec_result == None:
-        connection.commit()
-        cursor.close()
-        connection.close()
-        return {
-            "msg": "Data Updated Successfully"
-        }
-    else:
-        status_code = status.HTTP_202_ACCEPTED
-        return {
-            "Msg":" Could not update post"
-            }
+    post = find_post_in_db(passed_id)
+    update_post_sql = posts_table.update().where(posts_table.c.id == passed_id).values(title=post_json['title'],firstname=post_json['firstname'],lastname=post_json['lastname'],content=post_json['content'])
+    conn.execute(update_post_sql)
+    update_commit = conn.commit()
+    print(update_commit)
 
 @app.patch("/patch_post_title/{passed_id}",status_code=status.HTTP_200_OK)
 async def patch(passed_id: int, request_patch: Request):
