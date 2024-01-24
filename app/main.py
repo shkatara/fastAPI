@@ -82,14 +82,15 @@ def users():
 
 @app.get("/post/{passed_id}", status_code=status.HTTP_200_OK)
 async def post_by_id(passed_id: int, status_code: Response):
-    final_results = find_post_in_db(passed_id)
-    if len(final_results) != 0:
-        return final_results
-    else:
+    result_list = []
+    select_sql_instruction = posts_table.select().where(posts_table.c.id == passed_id)
+    exec_sql = conn.execute(select_sql_instruction).fetchone()
+    if exec_sql == None:
         status_code.status_code = status.HTTP_404_NOT_FOUND
-        return {
-            "msg":"No Post Found"
-        }
+        return {"msg": "Data not found"}
+    return list(exec_sql)
+
+
 
 @app.post("/createpost",status_code=status.HTTP_201_CREATED)
 async def create_item(post: post_schema):
