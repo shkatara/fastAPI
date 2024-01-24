@@ -82,7 +82,6 @@ def users():
 
 @app.get("/post/{passed_id}", status_code=status.HTTP_200_OK)
 async def post_by_id(passed_id: int, status_code: Response):
-    result_list = []
     select_sql_instruction = posts_table.select().where(posts_table.c.id == passed_id)
     exec_sql = conn.execute(select_sql_instruction).fetchone()
     if exec_sql == None:
@@ -104,13 +103,19 @@ async def create_item(post: post_schema):
 
 @app.delete("/delete/post/{passed_id}")
 def delete_post(passed_id: int,status_code: Response):
-    delete_sql_statement = posts_table.delete().where(posts_table.c.id == passed_id)
-    conn.execute(delete_sql_statement)
-    commit = conn.commit()
-    if commit == None:
-        return {"msg": "Data inserted successfully"}
-    else:
-        return {"msg": "Data not inserted successfully"}
+    select_sql_instruction = posts_table.select().where(posts_table.c.id == passed_id)
+    exec_sql = conn.execute(select_sql_instruction).fetchone()
+    if exec_sql == None:
+        status_code.status_code = status.HTTP_404_NOT_FOUND
+        return {"msg": "Post not found"}
+    delete_sql_instruction = posts_table.delete().where(posts_table.c.id == passed_id)
+    exec_delete_sql = conn.execute(delete_sql_instruction)
+    delete_commit = conn.commit()
+    if delete_commit != None:
+        return {"msg": "Post Not deleted"}
+    return {"msg": "Post Succesfully deleted"}
+
+
 
 
     
