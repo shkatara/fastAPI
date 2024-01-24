@@ -88,8 +88,7 @@ async def post_by_id(passed_id: int, status_code: Response):
     if exec_sql == None:
         status_code.status_code = status.HTTP_404_NOT_FOUND
         return {"msg": "Data not found"}
-    return list(exec_sql)
-
+    return list(exec_sql)  #exec_sql is a tuple and can not be returned using return. Hence need to convert it to list
 
 
 @app.post("/createpost",status_code=status.HTTP_201_CREATED)
@@ -105,31 +104,13 @@ async def create_item(post: post_schema):
 
 @app.delete("/delete/post/{passed_id}")
 def delete_post(passed_id: int,status_code: Response):
-    #Create database connection
-    connection = connect(host=os.getenv('DB_HOST'), user=os.getenv('DB_USER'),database=os.getenv('DB_NAME'),password="redhat123")
-    #Check if connection
-    if not connection:
-        sys.exit("Database not initialized. Exited...!!!")
-    #create cursor
-    cursor = connection.cursor()
-    #Create query
-    query = f'DELETE FROM {os.getenv("DB_TABLE_NAME")} where id={passed_id}'
-    #run query
-    exec_result = cursor.execute(query)
-    #return exec_result
-    if exec_result == None:
-        connection.commit()
-        cursor.close()
-        connection.close()
-        return {
-            "msg": "Data Deleted Successfully (!if Existed)"
-        }
+    delete_sql_statement = posts_table.delete().where(posts_table.c.id == passed_id)
+    conn.execute(delete_sql_statement)
+    commit = conn.commit()
+    if commit == None:
+        return {"msg": "Data inserted successfully"}
     else:
-        status_code.status_code = status.HTTP_202_ACCEPTED
-        return {
-            "Msg":" Could not delete post"
-            }
-
+        return {"msg": "Data not inserted successfully"}
 
 
     
