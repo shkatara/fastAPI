@@ -5,43 +5,32 @@ import uvicorn
 from random import randrange
 from mysql.connector import connect
 import sys
-
+from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData
 import os
 from dotenv import load_dotenv
 
 #Load environment values from .env file
-load_dotenv()
 
 class post_schema(BaseModel):
     title: str
-    age: int
     firstname: str
     lastname: str
     content: str
-    #id: int
 
 app = FastAPI()
 
-content= [
-    {
-        "title": "FastAPI",
-        "age":  10,
-        "testingdata": "This is america",
-        "id": 1
-    },
-    {
-        "title": "NewWorld",
-        "age":  20,
-        "testingdata": "This is networking data",
-        "id": 2
-    },
-    {
-        "title": "Beautiful Python",
-        "age":  30,
-        "testingdata": "Learning to build API",
-        "id": 3
-    }
-]
+#create engine for sqlalchemy
+engine = create_engine("mysql+pymysql://root:redhat123@localhost/posts")
+
+#create connection to mysql
+conn = engine.connect()
+
+#meta object to hold table metadata
+posts_table_meta = MetaData()
+
+posts_table = Table('posts',posts_table_meta,Column('id', Integer, primary_key=True, autoincrement=True),Column('title', String(255)),Column('firstname', String(255)),Column('lastname', String(255)),Column('content',String(255)))
+posts_table_meta.create_all(engine)
+
 
 def find_post_in_db(*args):
     connection = connect(host=os.getenv('DB_HOST'), user=os.getenv('DB_USER'),database=os.getenv('DB_NAME'),password="redhat123")
@@ -106,29 +95,10 @@ async def post_by_id(passed_id: int, status_code: Response):
 @app.post("/createpost",status_code=status.HTTP_201_CREATED)
 async def create_item(post: post_schema):
     post_json = post.model_dump()
-    #Create database connection
-    connection = connect(host=os.getenv('DB_HOST'), user=os.getenv('DB_USER'),database=os.getenv('DB_NAME'),password="redhat123")
-    #Check if connection
-    if not connection:
-        sys.exit("Database not initialized. Exited...!!!")
-    #create cursor
-    cursor = connection.cursor()
-    #Create query
-    query = f'INSERT INTO {os.getenv("DB_TABLE_NAME")} (title,age,firstname,lastname,content) VALUES ("{post_json["title"]}",{post_json["age"]},"{post_json["firstname"]}","{post_json["lastname"]}","{post_json["content"]}")'
-    #run query
-    exec_result = cursor.execute(query)
-    if exec_result == None:
-        connection.commit()
-        cursor.close()
-        connection.close()
-        return {
-            "msg":"Data Added Successfully"
-        }
-    else:
-        status_code = status.HTTP_408_REQUEST_TIMEOUT
-        return {
-            "Msg":" Could not add data."
-            }
+    #Insert data to posts table
+    insert = posts_table.insert().values(title=post_json['title'],firstname=post_json['firstname'],lastname=post_json['lastname'],content=post_json['content'])
+    return insert
+   
 
 @app.delete("/delete/post/{passed_id}")
 def delete_post(passed_id: int,status_code: Response):
@@ -184,7 +154,7 @@ def update(post: post_schema, passed_id: int):
             "msg": "Data Updated Successfully"
         }
     else:
-        status_code.status_code = status.HTTP_202_ACCEPTED
+        status_code = status.HTTP_202_ACCEPTED
         return {
             "Msg":" Could not update post"
             }
