@@ -5,7 +5,7 @@ import uvicorn
 from random import randrange
 from mysql.connector import connect
 import sys
-from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData
+from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, Select
 import os
 from dotenv import load_dotenv
 
@@ -72,15 +72,12 @@ async def users():
     }
 
 @app.get("/list_posts")
-async def users():
-    final_results = find_post_in_db()
-    if len(final_results) != 0:
-        return final_results
-    else:
-        return {
-            "msg":"No Post Found"
-        }
-
+def users():
+    select_sql_instruction = posts_table.select()
+    print(select_sql_instruction)
+    res = conn.execute(select_sql_instruction).fetchall()
+    for i in res:
+        print(i)
 @app.get("/post/{passed_id}", status_code=status.HTTP_200_OK)
 async def post_by_id(passed_id: int, status_code: Response):
     final_results = find_post_in_db(passed_id)
@@ -96,16 +93,12 @@ async def post_by_id(passed_id: int, status_code: Response):
 async def create_item(post: post_schema):
     post_json = post.model_dump()
     insert_sql_statement = posts_table.insert().values(title=post_json['title'],firstname=post_json['firstname'],lastname=post_json['lastname'],content=post_json['content'])
-    sql_execute_result = conn.execute(insert_sql_statement)
+    conn.execute(insert_sql_statement)
     commit = conn.commit()
     if commit == None:
-        return {
-            "msg": "Data inserted successfully"
-        }
+        return {"msg": "Data inserted successfully"}
     else:
-        return {
-            "msg": "Data not inserted successfully"
-        }
+        return {"msg": "Data not inserted successfully"}
 
 @app.delete("/delete/post/{passed_id}")
 def delete_post(passed_id: int,status_code: Response):
