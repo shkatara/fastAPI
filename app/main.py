@@ -73,11 +73,13 @@ async def users():
 
 @app.get("/list_posts")
 def users():
+    result_list = []
     select_sql_instruction = posts_table.select()
-    print(select_sql_instruction)
-    res = conn.execute(select_sql_instruction).fetchall()
-    for i in res:
-        print(i)
+    exec_sql = conn.execute(select_sql_instruction).all()
+    for row in exec_sql: 
+        result_list = result_list + [list(row)] #Row is a tuple and can not be returned using return. Hence need to convert it to list
+    return result_list
+
 @app.get("/post/{passed_id}", status_code=status.HTTP_200_OK)
 async def post_by_id(passed_id: int, status_code: Response):
     final_results = find_post_in_db(passed_id)
