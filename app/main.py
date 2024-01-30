@@ -1,13 +1,8 @@
 from fastapi import FastAPI,Request,Response,status
 #Request from fastAPI contains the JSON data that can be used for retrieving what user had given. This is similar to fetching data from a HTTP_METHOD request in PHP that I worked on storastack
-from pydantic import BaseModel
 import uvicorn
-from random import randrange
-from mysql.connector import connect
-import sys
 from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, Select
-import os
-from schemas import post_schema
+from schemas import post_schema , post_response
 
 #Load environment values from .env file
 
@@ -48,7 +43,8 @@ def users():
     select_sql_instruction = Select(posts_table.c.title,posts_table.c.content, posts_table.c.firstname, posts_table.c.lastname)
     exec_sql = conn.execute(select_sql_instruction).all()
     for row in exec_sql: 
-        result_list = result_list + [list(row)] #Row is a tuple and can not be returned using return. Hence need to convert it to list
+        print(row)
+        result_list = result_list + [{"title":row[0]},{"content":row[1]},{"firstname":row[2]},{"lastname":row[3]}]
     return result_list
 
 @app.get("/post/{passed_id}", status_code=status.HTTP_200_OK)

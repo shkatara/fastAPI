@@ -5,3 +5,7 @@ class post_schema(BaseModel):
     firstname: str
     lastname: str
     content: str
+
+class post_response(post_schema):
+    class Config:
+        from_attributes = True
