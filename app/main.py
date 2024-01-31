@@ -1,28 +1,11 @@
 from fastapi import FastAPI,Request,Response,status
 #Request from fastAPI contains the JSON data that can be used for retrieving what user had given. This is similar to fetching data from a HTTP_METHOD request in PHP that I worked on storastack
 import uvicorn
-from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, Select
-from schemas import post_schema , post_response
-
+from schemas import post_schema , post_response, user_create, user_create_respones
+from database import engine,conn,posts_table,users_table,Select
 #Load environment values from .env file
 
-
-
 app = FastAPI()
-
-#create engine for sqlalchemy
-engine = create_engine("mysql+pymysql://root:redhat123@localhost/posts")
-
-#create connection to mysql
-conn = engine.connect()
-
-#meta object to hold table metadata
-posts_table_meta = MetaData()
-
-#define table structure
-posts_table = Table('posts',posts_table_meta,Column('id', Integer, primary_key=True, autoincrement=True),Column('title', String(255)),Column('firstname', String(255)),Column('lastname', String(255)),Column('content',String(255)))
-posts_table_meta.create_all(engine)
-
 
 def find_post_in_db(post_id):
     select_sql_where_instruction = Select(posts_table.c.title,posts_table.c.content, posts_table.c.firstname, posts_table.c.lastname).where(posts_table.c.id == post_id)
@@ -43,8 +26,7 @@ def users():
     select_sql_instruction = Select(posts_table.c.title,posts_table.c.content, posts_table.c.firstname, posts_table.c.lastname)
     exec_sql = conn.execute(select_sql_instruction).all()
     for row in exec_sql: 
-        print(row)
-        result_list = result_list + [{"title":row[0]},{"content":row[1]},{"firstname":row[2]},{"lastname":row[3]}]
+        result_list = result_list + [list(row)]
     return result_list
 
 @app.get("/post/{passed_id}", status_code=status.HTTP_200_OK)
@@ -92,8 +74,13 @@ async def patch(passed_id: int, request_patch: Request):
     #not working yet. Need to see how to pass only the user provided keys in database, without hardcoding them.
 
 
+#########################
+#User registration logic#
+#########################
 
-
+@app.post("/user",status_code=status.HTTP_201_CREATED, response_model=user_create_respones)
+def userCreate(user: user_create):
+    return user 
 
 
 #start main app
