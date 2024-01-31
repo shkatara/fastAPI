@@ -3,7 +3,7 @@ from fastapi import FastAPI,Request,Response,status
 import uvicorn
 from schemas import post_schema , post_response, user_create, user_create_respones
 from database import engine,conn,posts_table,users_table,Select
-#Load environment values from .env file
+from bcrypt import gensalt, hashpw
 
 app = FastAPI()
 
@@ -84,8 +84,10 @@ def userCreate(userdata: user_create):
     exec_sql = conn.execute(find_user).fetchone()
     if exec_sql != None:
         return {"msg": "User already added"}
-    print(userDataJson)
-    sql = users_table.insert().values(email=userDataJson['email'],password=userDataJson['password'])
+    password_bytes = userDataJson['password'].encode('utf-8') 
+    salt = gensalt()
+    hash = hashpw(password_bytes,salt)
+    sql = users_table.insert().values(email=userDataJson['email'],password=hash,pwhash=hash)
     execute = conn.execute(sql)
     commit = conn.commit()
     print(execute)
