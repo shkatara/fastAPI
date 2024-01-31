@@ -18,4 +18,3 @@ users_table = Table('users',users_table_meta,Column('email', String(255), primar
 
 posts_table_meta.create_all(engine)
 users_table_meta.create_all(engine)
-conn.close()
