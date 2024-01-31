@@ -74,9 +74,9 @@ async def patch(passed_id: int, request_patch: Request):
     #not working yet. Need to see how to pass only the user provided keys in database, without hardcoding them.
 
 
-#########################
-#User registration logic#
-#########################
+###################
+#User registration#
+###################
 @app.post("/user",status_code=status.HTTP_201_CREATED)
 def userCreate(userdata: user_create,status_code: Response):
     userDataJson = userdata.model_dump()
@@ -93,9 +93,9 @@ def userCreate(userdata: user_create,status_code: Response):
     commit = conn.commit()
     return {"msg": "User added successfully"} if commit == None else {"msg": "User Not added"}
 
-#########################
+##################
 #User login logic#
-#########################
+##################
 @app.get("/login",status_code=status.HTTP_200_OK)
 def userLogin(userdata: user_create,status_code: Response):
     userDataJson = userdata.model_dump()
