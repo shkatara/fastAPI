@@ -3,7 +3,7 @@ from fastapi import FastAPI,Request,Response,status
 import uvicorn
 from schemas import post_schema , post_response, user_create, user_create_respones
 from database import engine,conn,posts_table,users_table,Select
-from bcrypt import gensalt, hashpw
+from bcrypt import gensalt, hashpw, checkpw
 
 app = FastAPI()
 
@@ -78,11 +78,12 @@ async def patch(passed_id: int, request_patch: Request):
 #User registration logic#
 #########################
 @app.post("/user",status_code=status.HTTP_201_CREATED)
-def userCreate(userdata: user_create):
+def userCreate(userdata: user_create,status_code: Response):
     userDataJson = userdata.model_dump()
     find_user = users_table.select().where(users_table.c.email == userDataJson['email'])
     exec_sql = conn.execute(find_user).fetchone()
     if exec_sql != None:
+        status_code.status_code = status.HTTP_208_ALREADY_REPORTED
         return {"msg": "User already added"}
     password_bytes = userDataJson['password'].encode('utf-8') 
     salt = gensalt()
@@ -91,6 +92,17 @@ def userCreate(userdata: user_create):
     execute = conn.execute(sql)
     commit = conn.commit()
     return {"msg": "User added successfully"} if commit == None else {"msg": "User Not added"}
+
+@app.get("/login",status_code=status.HTTP_200_OK)
+def userLogin(userdata: user_create,status_code: Response):
+    userDataJson = userdata.model_dump()
+    find_user = users_table.select().where(users_table.c.email == userDataJson['email'])
+    exec_sql = conn.execute(find_user).fetchone()
+    if exec_sql == None:
+        status_code.status_code = status.HTTP_404_NOT_FOUND
+        return {"msg": "User Not Found"}
+    return {"msg": "User Logged in successfully"} if checkpw(userDataJson['password'].encode('utf-8'),exec_sql[1]) else {"msg": "User login Failed"}
+    
 
 
 #start main app
