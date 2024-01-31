@@ -87,11 +87,9 @@ def userCreate(userdata: user_create):
     password_bytes = userDataJson['password'].encode('utf-8') 
     salt = gensalt()
     hash = hashpw(password_bytes,salt)
-    sql = users_table.insert().values(email=userDataJson['email'],password=hash,pwhash=hash)
+    sql = users_table.insert().values(email=userDataJson['email'],password=hash)
     execute = conn.execute(sql)
     commit = conn.commit()
-    print(execute)
-    print(commit)
     return {"msg": "User added successfully"} if commit == None else {"msg": "User Not added"}
 
 
