@@ -36,7 +36,7 @@ async def post_by_id(passed_id: int, status_code: Response):
   
     
 @app.post("/createpost",status_code=status.HTTP_201_CREATED)
-async def create_item(post: post_schema):
+def create_item(post: post_schema):
     post_json = post.model_dump()
     insert_sql_statement = posts_table.insert().values(title=post_json['title'],firstname=post_json['firstname'],lastname=post_json['lastname'],content=post_json['content'])
     conn.execute(insert_sql_statement)
@@ -77,10 +77,20 @@ async def patch(passed_id: int, request_patch: Request):
 #########################
 #User registration logic#
 #########################
-
-@app.post("/user",status_code=status.HTTP_201_CREATED, response_model=user_create_respones)
-def userCreate(user: user_create):
-    return user 
+@app.post("/user",status_code=status.HTTP_201_CREATED)
+def userCreate(userdata: user_create):
+    userDataJson = userdata.model_dump()
+    find_user = users_table.select().where(users_table.c.email == userDataJson['email'])
+    exec_sql = conn.execute(find_user).fetchone()
+    if exec_sql != None:
+        return {"msg": "User already added"}
+    print(userDataJson)
+    sql = users_table.insert().values(email=userDataJson['email'],password=userDataJson['password'])
+    execute = conn.execute(sql)
+    commit = conn.commit()
+    print(execute)
+    print(commit)
+    return {"msg": "User added successfully"} if commit == None else {"msg": "User Not added"}
 
 
 #start main app
