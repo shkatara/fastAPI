@@ -99,18 +99,14 @@ def userCreate(userdata: user_create,status_code: Response):
 @app.get("/login",status_code=status.HTTP_200_OK)
 def userLogin(userdata: user_create,status_code: Response):
     userDataJson = userdata.model_dump()
-    passhash = hashpw(userDataJson['password'].encode('utf-8'),gensalt())
-    print(passhash)
     find_user = users_table.select().where(users_table.c.email == userDataJson['email'])
     exec_sql = conn.execute(find_user).fetchone()
     if exec_sql == None:
         status_code.status_code = status.HTTP_404_NOT_FOUND
-        return {"msg": "User Not Found"}
-    print(userDataJson['password'])
-    print(exec_sql[2])
-    passwordnew = checkpw(userDataJson['password'].encode('utf-8'),exec_sql[2])
-    #print(passwordnew)
-    #return {"msg": "User Logged in successfully"} if checkpw(userDataJson['password'].encode('utf-8'),exec_sql[1]) else {"msg": "User login Failed"}
+        return {"msg": "Username or password incorrect"}
+    encoded_hash = exec_sql[1].encode('utf-8')
+    calc_hash = hashpw(userDataJson['password'].encode('utf-8'),exec_sql[2].encode('utf-8'))
+    return {"msg": "User Logged in successfully"} if encoded_hash == calc_hash else {"msg": "User login Failed"}
     
 
 
