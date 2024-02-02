@@ -1,4 +1,5 @@
-from schemas import user_create, user_create_respones
+from schemas import user_create
+from oauth2 import create_access_token
 from database import conn,users_table,find_user_in_db
 from fastapi import Response,status,APIRouter
 #Request from fastAPI contains the JSON data that can be used for retrieving what user had given. This is similar to fetching data from a HTTP_METHOD request in PHP that I worked on storastack
@@ -34,8 +35,15 @@ def userLogin(userdata: user_create,status_code: Response):
     findUser = find_user_in_db(userdata.email)
     if isinstance(findUser,dict):
         status_code.status_code = status.HTTP_404_NOT_FOUND
-        return {"msg": "Username or password incorrect"}
+        return {"msg": "Not Registered"}
     encoded_hash = findUser[1].encode('utf-8')
     calc_hash = hashpw(userdata.password.encode('utf-8'),findUser[2].encode('utf-8'))
-    return {"token": "Example token"} if encoded_hash == calc_hash else {"msg": "User login Failed"}
+    if encoded_hash != calc_hash:
+        return {"msg": "Invalid Credentials"}
+    else:
+        token = create_access_token({'payload':userdata.email})
+    return {
+        "token":token,
+        "type": "Bearer"
+    } 
     
