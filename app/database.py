@@ -18,3 +18,10 @@ users_table = Table('users',users_table_meta,Column('email', String(255), primar
 
 posts_table_meta.create_all(engine)
 users_table_meta.create_all(engine)
+
+def find_post_in_db(post_id):
+    select_sql_where_instruction = Select(posts_table.c.title,posts_table.c.content, posts_table.c.firstname, posts_table.c.lastname).where(posts_table.c.id == post_id)
+    exec_sql = conn.execute(select_sql_where_instruction).fetchone()
+    if exec_sql == None:
+        return {"msg": "Data not found"}
+    return list(exec_sql)
