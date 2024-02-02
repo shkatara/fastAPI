@@ -23,3 +23,8 @@ def find_post_in_db(post_id):
     select_sql_where_instruction = Select(posts_table.c.title,posts_table.c.content, posts_table.c.firstname, posts_table.c.lastname).where(posts_table.c.id == post_id)
     exec_sql = conn.execute(select_sql_where_instruction).fetchone()
     return list(exec_sql) if exec_sql is not None else  {"msg":"Post not found"}
+
+def find_user_in_db(user_email):
+    select_sql_where_instruction = Select("*").where(users_table.c.email == user_email)
+    exec_sql = conn.execute(select_sql_where_instruction).fetchone()
+    return list(exec_sql) if exec_sql is not None else  {"msg":"User not found"}
