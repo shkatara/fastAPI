@@ -23,7 +23,7 @@ def validate_access_token(token: str):
         user_email = payload.get('email')
         token_expire = payload.get("exp")
         if user_email is not None:
-            return {"email": user_email,"expire": False} 
+            return {"email": user_email,"expire": False,"msg":f'Welcome {user_email}'} 
     except:
         return {"expire": True,"msg": "Token Expired. Please Login Again."}
         
