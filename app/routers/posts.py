@@ -61,12 +61,15 @@ def delete_post(passed_id: int,status_code: Response,Authorization: str = Header
 
     
 @posts_router.put("/update/{passed_id}",status_code=status.HTTP_200_OK)
-def update(post: post_schema, passed_id: int):
-    findPost = find_post_in_db(passed_id)
-    if isinstance(findPost,dict):
-        return {"msg":"Post Not Found"}
-    update_post_sql = posts_table.update().where(posts_table.c.id == passed_id).values(title=post.title,firstname=post.firstname,lastname=post.lastname,content=post.content)
-    conn.execute(update_post_sql)
-    return {"msg": "Post Succesfully Updated"} if conn.commit() is None else {"msg": "Post Not updated"}
-
+def update(post: post_schema, passed_id: int,Authorization: str = Header(default=None)):
+    token = Authorization
+    if "email" in validate_access_token(token):
+        findPost = find_post_in_db(passed_id)
+        if isinstance(findPost,dict):
+            return {"msg":"Post Not Found"}
+        update_post_sql = posts_table.update().where(posts_table.c.id == passed_id).values(title=post.title,firstname=post.firstname,lastname=post.lastname,content=post.content)
+        conn.execute(update_post_sql)
+        return {"msg": "Post Succesfully Updated"} if conn.commit() is None else {"msg": "Post Not updated"}
+    else:
+        return {"msg":"Unauthenticated","detail":"Could not Validate Authentication. Please login again"}
 
