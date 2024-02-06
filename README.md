@@ -12,7 +12,8 @@ The Project is to create a fully functional API with a working MySQL Database to
 This project serves as a self learning to have a better understanding of APIs. The project implements the API with a fully functional JWT token authentication mechanism, have all the correct response and status codes depending on the actual status of the code execution.
 
 Along the way of this project, it uses:
-1. FastAPI (Obviously)
+1. Python 3.9.6 (Obviously)
+1. FastAPI
 2. Pydantic - For setting models for User Input and Responses
 3. SQLAlchemy
 
