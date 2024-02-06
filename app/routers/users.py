@@ -1,7 +1,9 @@
 from schemas import user_create
+from typing import Union
+
 from oauth2 import create_access_token
 from database import conn,users_table,find_user_in_db
-from fastapi import Response,status,APIRouter
+from fastapi import Response,status,APIRouter,Header
 #Request from fastAPI contains the JSON data that can be used for retrieving what user had given. This is similar to fetching data from a HTTP_METHOD request in PHP that I worked on storastack
 from bcrypt import gensalt, hashpw
 
@@ -47,3 +49,8 @@ def userLogin(userdata: user_create,status_code: Response):
         "type": "Bearer"
     } 
     
+@users_router.get("/lookup/self/",status_code=status.HTTP_200_OK)
+#def userSelfLookup(token: str = Header()):
+#    return token
+async def read_items(Authorization: str = Header(default=None)):
+    return {"token": Authorization}

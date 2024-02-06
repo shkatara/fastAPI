@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from jose import jwt
+from fastapi import Header
 
 #This code returns a JWT token upon user login.
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
@@ -15,3 +16,5 @@ def create_access_token(payload: dict):
     #generate JWT token
     return jwt.encode(payload_encode,SECRET_KEY,algorithm=ALGORITHM)
 
+def return_token_info(header: str = Header(default=None)):
+    return {"token": header}
