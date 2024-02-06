@@ -34,6 +34,9 @@ async def post_by_id(response: Response,passed_id: int,Authorization: str = Head
         return {"Error": "Token Invalid"}
     else:
         post = find_post_in_db(passed_id)
+        if isinstance(post,dict):
+            response.status_code = status.HTTP_404_NOT_FOUND
+            return {"msg":"Post Not Found"}
         return post
 
     
@@ -46,7 +49,11 @@ def create_item(response: Response,post: post_schema, Authorization: str = Heade
     else:
         insert_sql_statement = posts_table.insert().values(title=post.title,firstname=post.firstname,lastname=post.lastname,content=post.content)
         conn.execute(insert_sql_statement)
-        return {"msg": "Data inserted successfully"} if conn.commit() is None else {"msg": "Data not inserted successfully"}
+        if conn.commit() is None:
+            return {"msg": "Data inserted successfully"}  
+        else:
+            response.status_code = status.HTTP_400_BAD_REQUEST 
+            return {"msg": "Data not inserted successfully"}
 
 
 @posts_router.delete("/delete/{passed_id}")
@@ -58,6 +65,7 @@ def delete_post(passed_id: int,response: Response,Authorization: str = Header(de
     else:
         findPost = find_post_in_db(passed_id)
         if isinstance(findPost,dict):
+            response.status_code = status.HTTP_404_NOT_FOUND
             return {"msg":"Post Not Found"}
         delete_sql_instruction = posts_table.delete().where(posts_table.c.id == passed_id)
         conn.execute(delete_sql_instruction)
@@ -72,6 +80,7 @@ def update(response: Response,post: post_schema, passed_id: int,Authorization: s
     else:
         findPost = find_post_in_db(passed_id)
         if isinstance(findPost,dict):
+            response.status_code = status.HTTP_404_NOT_FOUND
             return {"msg":"Post Not Found"}
         update_post_sql = posts_table.update().where(posts_table.c.id == passed_id).values(title=post.title,firstname=post.firstname,lastname=post.lastname,content=post.content)
         conn.execute(update_post_sql)
