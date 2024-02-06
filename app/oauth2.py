@@ -26,6 +26,6 @@ def validate_access_token(token: str):
         if user_email is not None:
             return {"email": user_email,"expire": False} 
     except:
-        return {"expire": True}
+        return {"expire": True,"msg": "Token Expired. Please Login Again."}
         
     
