@@ -11,7 +11,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 def create_access_token(payload: dict):
     payload_encode = payload.copy()
     expire_time = datetime.now() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    print(expire_time)
     #create token expiry time ( token is valid for 30m from now )
     payload_encode.update({"exp": expire_time})
 

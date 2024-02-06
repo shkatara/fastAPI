@@ -19,4 +19,7 @@ class user_create_respones(BaseModel):
     class Config:
         from_attributes = True
 
-    
+class user_token_validate(BaseModel):
+    msg: str
+    class Config:
+        from_attributes = True

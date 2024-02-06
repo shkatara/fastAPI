@@ -11,10 +11,11 @@ posts_router = APIRouter(
 
 )
 
-@posts_router.get("/list")
-def list_posts(Authorization: str = Header(default=None)):
+@posts_router.get("/list",status_code=status.HTTP_200_OK)
+def list_posts(response: Response,Authorization: str = Header(default=None)):
     token = Authorization
     if validate_access_token(token)['expire']:
+        response.status_code = status.HTTP_401_UNAUTHORIZED
         return {"Error": "Token Invalid."}
     else:
         result_list = []
@@ -26,19 +27,21 @@ def list_posts(Authorization: str = Header(default=None)):
     
 
 @posts_router.get("/fetch/{passed_id}", status_code=status.HTTP_200_OK)
-async def post_by_id(passed_id: int, status_code: Response,Authorization: str = Header(default=None)):
+async def post_by_id(response: Response,passed_id: int,Authorization: str = Header(default=None)):
     token = Authorization
     if validate_access_token(token)['expire']:
-        return {"Error": "Token Invalid."}
+        response.status_code = status.HTTP_401_UNAUTHORIZED
+        return {"Error": "Token Invalid"}
     else:
         post = find_post_in_db(passed_id)
         return post
 
     
 @posts_router.post("/create",status_code=status.HTTP_201_CREATED)
-def create_item(post: post_schema, Authorization: str = Header(default=None)):
+def create_item(response: Response,post: post_schema, Authorization: str = Header(default=None)):
     token = Authorization
     if validate_access_token(token)['expire']:
+        response.status_code = status.HTTP_401_UNAUTHORIZED
         return {"Error": "Token Invalid."}
     else:
         insert_sql_statement = posts_table.insert().values(title=post.title,firstname=post.firstname,lastname=post.lastname,content=post.content)
@@ -47,9 +50,10 @@ def create_item(post: post_schema, Authorization: str = Header(default=None)):
 
 
 @posts_router.delete("/delete/{passed_id}")
-def delete_post(passed_id: int,status_code: Response,Authorization: str = Header(default=None)):
+def delete_post(passed_id: int,response: Response,Authorization: str = Header(default=None)):
     token = Authorization
     if validate_access_token(token)['expire']:
+        response.status_code = status.HTTP_401_UNAUTHORIZED
         return {"Error": "Token Invalid."}
     else:
         findPost = find_post_in_db(passed_id)
@@ -60,9 +64,10 @@ def delete_post(passed_id: int,status_code: Response,Authorization: str = Header
         return {"msg": "Post Succesfully deleted"} if conn.commit() is None else {"msg": "Post Not deleted"}
     
 @posts_router.put("/update/{passed_id}",status_code=status.HTTP_200_OK)
-def update(post: post_schema, passed_id: int,Authorization: str = Header(default=None)):
+def update(response: Response,post: post_schema, passed_id: int,Authorization: str = Header(default=None)):
     token = Authorization
     if validate_access_token(token)['expire']:
+        response.status_code = status.HTTP_401_UNAUTHORIZED
         return {"Error": "Token Invalid."}
     else:
         findPost = find_post_in_db(passed_id)
