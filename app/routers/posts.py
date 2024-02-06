@@ -26,17 +26,24 @@ def list_posts(Authorization: str = Header(default=None)):
 
 
 @posts_router.get("/fetch/{passed_id}", status_code=status.HTTP_200_OK)
-async def post_by_id(passed_id: int, status_code: Response):
-    post = find_post_in_db(passed_id)
-    return post
-  
+async def post_by_id(passed_id: int, status_code: Response,Authorization: str = Header(default=None)):
+    token = Authorization
+    if "email" in validate_access_token(token):
+        post = find_post_in_db(passed_id)
+        return post
+    else:
+        return {"msg":"Unauthenticated","detail":"Could not Validate Authentication. Please login again"}
     
 @posts_router.post("/create",status_code=status.HTTP_201_CREATED)
-def create_item(post: post_schema):
-    insert_sql_statement = posts_table.insert().values(title=post.title,firstname=post.firstname,lastname=post.lastname,content=post.content)
-    conn.execute(insert_sql_statement)
-    return {"msg": "Data inserted successfully"} if conn.commit() is None else {"msg": "Data not inserted successfully"}
-    
+def create_item(post: post_schema, Authorization: str = Header(default=None)):
+    token = Authorization
+    if "email" in validate_access_token(token):
+        insert_sql_statement = posts_table.insert().values(title=post.title,firstname=post.firstname,lastname=post.lastname,content=post.content)
+        conn.execute(insert_sql_statement)
+        return {"msg": "Data inserted successfully"} if conn.commit() is None else {"msg": "Data not inserted successfully"}
+    else:
+        return {"msg":"Unauthenticated","detail":"Could not Validate Authentication. Please login again"}
+
 
 @posts_router.delete("/delete/{passed_id}")
 def delete_post(passed_id: int,status_code: Response):
