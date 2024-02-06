@@ -46,13 +46,17 @@ def create_item(post: post_schema, Authorization: str = Header(default=None)):
 
 
 @posts_router.delete("/delete/{passed_id}")
-def delete_post(passed_id: int,status_code: Response):
-    findPost = find_post_in_db(passed_id)
-    if isinstance(findPost,dict):
-        return {"msg":"Post Not Found"}
-    delete_sql_instruction = posts_table.delete().where(posts_table.c.id == passed_id)
-    conn.execute(delete_sql_instruction)
-    return {"msg": "Post Succesfully deleted"} if conn.commit() is None else {"msg": "Post Not deleted"}
+def delete_post(passed_id: int,status_code: Response,Authorization: str = Header(default=None)):
+    token = Authorization
+    if "email" in validate_access_token(token):
+        findPost = find_post_in_db(passed_id)
+        if isinstance(findPost,dict):
+            return {"msg":"Post Not Found"}
+        delete_sql_instruction = posts_table.delete().where(posts_table.c.id == passed_id)
+        conn.execute(delete_sql_instruction)
+        return {"msg": "Post Succesfully deleted"} if conn.commit() is None else {"msg": "Post Not deleted"}
+    else:
+        return {"msg":"Unauthenticated","detail":"Could not Validate Authentication. Please login again"}
    
 
     
