@@ -1,5 +1,6 @@
 from database import conn,posts_table,Select,find_post_in_db
-from fastapi import Request,Response,status,APIRouter
+from fastapi import Request,Response,status,APIRouter,Header
+from oauth2 import validate_access_token
 #Request from fastAPI contains the JSON data that can be used for retrieving what user had given. This is similar to fetching data from a HTTP_METHOD request in PHP that I worked on storastack
 
 from schemas import post_schema
@@ -11,13 +12,18 @@ posts_router = APIRouter(
 )
 
 @posts_router.get("/list")
-def users():
-    result_list = []
-    select_sql_instruction = Select(posts_table.c.title,posts_table.c.content, posts_table.c.firstname, posts_table.c.lastname)
-    exec_sql = conn.execute(select_sql_instruction).all()
-    for row in exec_sql: 
-        result_list = result_list + [list(row)]
-    return result_list
+def list_posts(Authorization: str = Header(default=None)):
+    token = Authorization
+    if "email" in validate_access_token(token):
+        result_list = []
+        select_sql_instruction = Select(posts_table.c.title,posts_table.c.content, posts_table.c.firstname, posts_table.c.lastname)
+        exec_sql = conn.execute(select_sql_instruction).all()
+        for row in exec_sql: 
+            result_list = result_list + [list(row)]
+        return result_list
+    else:
+        return {"msg":"Unauthenticated","detail":"Could not Validate Authentication. Please login again"}
+
 
 @posts_router.get("/fetch/{passed_id}", status_code=status.HTTP_200_OK)
 async def post_by_id(passed_id: int, status_code: Response):

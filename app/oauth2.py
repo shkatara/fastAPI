@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from jose import jwt
+from jose import jwt,JWTError
 from fastapi import Header
 
 #This code returns a JWT token upon user login.
@@ -18,3 +18,13 @@ def create_access_token(payload: dict):
 
 def return_token_info(header: str = Header(default=None)):
     return {"token": header}
+
+def validate_access_token(token: str):
+    try:
+        payload = jwt.decode(token,SECRET_KEY,ALGORITHM)
+        user_email = payload.get('email')
+        if user_email is not None:
+            return {"email": user_email}   
+    except:
+        return {"msg":"Unauthenticated","detail":"Could not Validate Authentication. Please login again"}
+    
