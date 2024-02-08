@@ -15,13 +15,13 @@ posts_router = APIRouter(
 @posts_router.get("/list",status_code=status.HTTP_200_OK)
 def list_posts(response: Response,Authorization: str = Header(default=None)):
     token = Authorization
+    print(validate_access_token(token=token)['email'])
     if validate_access_token(token)['expire']:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {"Error": "Token Expired."}
     else:
         result_list = []
         select_sql_instruction = Select(posts_table.c.post_title,posts_table.c.post_content,posts_table.c.post_owner).where(users_table.c.email==str(text(validate_access_token(token)['email'])))
-        print(select_sql_instruction)
         exec_sql = conn.execute(select_sql_instruction).all()
         for row in exec_sql: 
             result_list = result_list + [list(row)]
