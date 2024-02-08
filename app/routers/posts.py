@@ -16,7 +16,7 @@ def list_posts(response: Response,Authorization: str = Header(default=None)):
     token = Authorization
     if validate_access_token(token)['expire']:
         response.status_code = status.HTTP_401_UNAUTHORIZED
-        return {"Error": "Token Invalid."}
+        return {"Error": "Token Expired."}
     else:
         result_list = []
         select_sql_instruction = Select(posts_table.c.title,posts_table.c.content, posts_table.c.firstname, posts_table.c.lastname)
@@ -31,7 +31,7 @@ async def post_by_id(response: Response,passed_id: int,Authorization: str = Head
     token = Authorization
     if validate_access_token(token)['expire']:
         response.status_code = status.HTTP_401_UNAUTHORIZED
-        return {"Error": "Token Invalid"}
+        return {"Error": "Token Expired"}
     else:
         post = find_post_in_db(passed_id)
         if isinstance(post,dict):
@@ -45,7 +45,7 @@ def create_item(response: Response,post: post_schema, Authorization: str = Heade
     token = Authorization
     if validate_access_token(token)['expire']:
         response.status_code = status.HTTP_401_UNAUTHORIZED
-        return {"Error": "Token Invalid."}
+        return {"Error": "Token Expired."}
     else:
         insert_sql_statement = posts_table.insert().values(title=post.title,firstname=post.firstname,lastname=post.lastname,content=post.content)
         conn.execute(insert_sql_statement)
@@ -61,7 +61,7 @@ def delete_post(passed_id: int,response: Response,Authorization: str = Header(de
     token = Authorization
     if validate_access_token(token)['expire']:
         response.status_code = status.HTTP_401_UNAUTHORIZED
-        return {"Error": "Token Invalid."}
+        return {"Error": "Token Expired."}
     else:
         findPost = find_post_in_db(passed_id)
         if isinstance(findPost,dict):
@@ -76,7 +76,7 @@ def update(response: Response,post: post_schema, passed_id: int,Authorization: s
     token = Authorization
     if validate_access_token(token)['expire']:
         response.status_code = status.HTTP_401_UNAUTHORIZED
-        return {"Error": "Token Invalid."}
+        return {"Error": "Token Expired."}
     else:
         findPost = find_post_in_db(passed_id)
         if isinstance(findPost,dict):
