@@ -1,4 +1,5 @@
-from database import conn,posts_table,Select,find_post_in_db
+from database import conn,posts_table,Select,find_post_in_db,users_table
+from sqlalchemy import text
 from fastapi import Request,Response,status,APIRouter,Header
 from oauth2 import validate_access_token
 #Request from fastAPI contains the JSON data that can be used for retrieving what user had given. This is similar to fetching data from a HTTP_METHOD request in PHP that I worked on storastack
@@ -19,7 +20,8 @@ def list_posts(response: Response,Authorization: str = Header(default=None)):
         return {"Error": "Token Expired."}
     else:
         result_list = []
-        select_sql_instruction = Select(posts_table.c.title,posts_table.c.content, posts_table.c.firstname, posts_table.c.lastname)
+        select_sql_instruction = Select(posts_table.c.post_title,posts_table.c.post_content,posts_table.c.post_owner).where(users_table.c.email==str(text(validate_access_token(token)['email'])))
+        print(select_sql_instruction)
         exec_sql = conn.execute(select_sql_instruction).all()
         for row in exec_sql: 
             result_list = result_list + [list(row)]

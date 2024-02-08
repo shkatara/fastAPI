@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String,Integer,Table,MetaData,create_engine,Select
+from sqlalchemy import Column, String,Integer,Table,MetaData,create_engine,Select,ForeignKey,text
 
 
 #create engine for sqlalchemy
@@ -13,11 +13,25 @@ users_table_meta = MetaData()
 
 
 #define table structure
-posts_table = Table('posts',posts_table_meta,Column('id', Integer, primary_key=True, autoincrement=True),Column('title', String(255)),Column('firstname', String(255)),Column('lastname', String(255)),Column('content',String(255)))
-users_table = Table('users',users_table_meta,Column('email', String(255), primary_key=True),Column('password', String(255)),Column('pass_salt', String(255)))
+users_table = Table(
+    'users',
+    users_table_meta,
+    Column('email', String(255), primary_key=True),
+    Column('password', String(255)),
+    Column('pass_salt', String(255))
+)
 
-posts_table_meta.create_all(engine)
+posts_table = Table(
+    'posts',
+    posts_table_meta,
+    Column('post_id', Integer, primary_key=True, autoincrement=True),
+    Column('post_title', String(255)),
+    Column('post_owner', String(255),ForeignKey(users_table.c.email)),
+    Column('post_content',String(255))
+)
+
 users_table_meta.create_all(engine)
+posts_table_meta.create_all(engine)
 
 def find_post_in_db(post_id):
     select_sql_where_instruction = Select(posts_table.c.title,posts_table.c.content, posts_table.c.firstname, posts_table.c.lastname).where(posts_table.c.id == post_id)
