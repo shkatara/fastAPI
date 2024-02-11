@@ -1,8 +1,13 @@
 from sqlalchemy import Column, String,Integer,Table,MetaData,create_engine,Select,ForeignKey
+from dotenv import load_dotenv
+from os import getenv
 #from oauth2 import validate_access_token
 
+load_dotenv()
+
+print(getenv("DB_NAME"))
 #create engine for sqlalchemy
-engine = create_engine("mysql+pymysql://root:redhat123@localhost/posts")
+engine = create_engine(f'mysql+pymysql://{getenv("DB_USER")}:{getenv("DB_PASSW")}@{getenv("DB_HOST")}/{getenv("DB_NAME")}')
 
 #create connection to mysql
 conn = engine.connect()
