@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 import uvicorn
 from routers import posts,users
-import oauth2
 
 app = FastAPI()
 

@@ -2,7 +2,7 @@ from schemas import user_create,user_token_validate
 
 from oauth2 import create_access_token,validate_access_token
 from database import conn,users_table,find_user_in_db
-from fastapi import Response,status,APIRouter,Header,Form
+from fastapi import Response,status,APIRouter,Header
 #Request from fastAPI contains the JSON data that can be used for retrieving what user had given. This is similar to fetching data from a HTTP_METHOD request in PHP that I worked on storastack
 from bcrypt import gensalt, hashpw
 

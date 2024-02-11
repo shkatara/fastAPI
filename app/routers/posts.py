@@ -1,6 +1,6 @@
 from database import conn,posts_table,Select,find_post_in_db,users_table
 from sqlalchemy import text
-from fastapi import Request,Response,status,APIRouter,Header
+from fastapi import Response,status,APIRouter,Header
 from oauth2 import validate_access_token
 #Request from fastAPI contains the JSON data that can be used for retrieving what user had given. This is similar to fetching data from a HTTP_METHOD request in PHP that I worked on storastack
 

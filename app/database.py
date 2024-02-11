@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String,Integer,Table,MetaData,create_engine,Select,ForeignKey,text
+from sqlalchemy import Column, String,Integer,Table,MetaData,create_engine,Select,ForeignKey
 #from oauth2 import validate_access_token
 
 #create engine for sqlalchemy
