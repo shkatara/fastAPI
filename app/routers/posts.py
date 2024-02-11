@@ -72,17 +72,18 @@ def delete_post(passed_id: int,response: Response,Authorization: str = Header(de
         conn.execute(delete_sql_instruction)
         return {"msg": "Post Succesfully deleted"} if conn.commit() is None else {"msg": "Post Not deleted"}
     
-@posts_router.put("/update/{passed_id}",status_code=status.HTTP_200_OK)
+@posts_router.put("/update/{passed_id}",status_code=status.HTTP_201_CREATED)
 def update(response: Response,post: post_schema, passed_id: int,Authorization: str = Header(default=None)):
     token = Authorization
     if validate_access_token(token)['expire']:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {"Error": "Token Expired."}
     else:
-        findPost = find_post_in_db(passed_id)
+        findPost = find_post_in_db(passed_id,validate_access_token(token)['email'])
         if isinstance(findPost,dict):
             response.status_code = status.HTTP_404_NOT_FOUND
             return {"msg":"Post Not Found"}
-        update_post_sql = posts_table.update().where(posts_table.c.id == passed_id).values(title=post.title,firstname=post.firstname,lastname=post.lastname,content=post.content)
+        update_post_sql = posts_table.update().where(posts_table.c.post_id == passed_id).values(post_title=post.title,post_content=post.content)
         conn.execute(update_post_sql)
+        conn.commit()
         return {"msg": "Post Succesfully Updated"} if conn.commit() is None else {"msg": "Post Not updated"}
