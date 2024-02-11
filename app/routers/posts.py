@@ -64,11 +64,11 @@ def delete_post(passed_id: int,response: Response,Authorization: str = Header(de
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {"Error": "Token Expired."}
     else:
-        findPost = find_post_in_db(passed_id)
+        findPost = find_post_in_db(passed_id,validate_access_token(token)['email'])
         if isinstance(findPost,dict):
             response.status_code = status.HTTP_404_NOT_FOUND
             return {"msg":"Post Not Found"}
-        delete_sql_instruction = posts_table.delete().where(posts_table.c.id == passed_id)
+        delete_sql_instruction = posts_table.delete().where(posts_table.c.post_id == passed_id)
         conn.execute(delete_sql_instruction)
         return {"msg": "Post Succesfully deleted"} if conn.commit() is None else {"msg": "Post Not deleted"}
     
