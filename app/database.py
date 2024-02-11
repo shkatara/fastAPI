@@ -1,5 +1,5 @@
 from sqlalchemy import Column, String,Integer,Table,MetaData,create_engine,Select,ForeignKey,text
-
+#from oauth2 import validate_access_token
 
 #create engine for sqlalchemy
 engine = create_engine("mysql+pymysql://root:redhat123@localhost/posts")
@@ -33,9 +33,11 @@ posts_table = Table(
 users_table_meta.create_all(engine)
 posts_table_meta.create_all(engine)
 
-def find_post_in_db(post_id):
-    select_sql_where_instruction = Select(posts_table.c.title,posts_table.c.content, posts_table.c.firstname, posts_table.c.lastname).where(posts_table.c.id == post_id)
-    exec_sql = conn.execute(select_sql_where_instruction).fetchone()
+def find_post_in_db(post_id: str, email: str):
+    #select_sql_instruction = Select(posts_table.c.post_title,posts_table.c.post_content,posts_table.c.post_owner).where(posts_table.c.id == post_id)
+    select_sql_instruction = Select(posts_table.c.post_title,posts_table.c.post_content,posts_table.c.post_owner).where(posts_table.c.post_owner==email,posts_table.c.post_id == post_id).join(users_table)
+
+    exec_sql = conn.execute(select_sql_instruction).fetchone()
     return list(exec_sql) if exec_sql is not None else  {"msg":"Post not found"}
 
 def find_user_in_db(user_email):

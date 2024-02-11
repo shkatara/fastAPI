@@ -20,8 +20,7 @@ def list_posts(response: Response,Authorization: str = Header(default=None)):
         return {"Error": "Token Expired."}
     else:
         result_list = []
-        select_sql_instruction = Select(posts_table.c.post_title,posts_table.c.post_content,posts_table.c.post_owner).where(posts_table.c.post_owner==validate_access_token(token)['email']).join(users_table,users_table.c.email==str(text(validate_access_token(token)['email'])))
-        print(select_sql_instruction)
+        select_sql_instruction = Select(posts_table.c.post_title,posts_table.c.post_content,posts_table.c.post_owner).where(posts_table.c.post_owner==validate_access_token(token)['email']).join(users_table)
         exec_sql = conn.execute(select_sql_instruction).all()
         for row in exec_sql: 
             result_list = result_list + [list(row)]
@@ -35,7 +34,7 @@ async def post_by_id(response: Response,passed_id: int,Authorization: str = Head
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {"Error": "Token Expired"}
     else:
-        post = find_post_in_db(passed_id)
+        post = find_post_in_db(passed_id,validate_access_token(token)['email'])
         if isinstance(post,dict):
             response.status_code = status.HTTP_404_NOT_FOUND
             return {"msg":"Post Not Found"}
