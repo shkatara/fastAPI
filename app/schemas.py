@@ -21,3 +21,7 @@ class user_token_validate(BaseModel):
     msg: str
     class Config:
         from_attributes = True
+
+class vote_schema(BaseModel):
+    post_id: int
+    direction: int

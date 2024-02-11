@@ -1,28 +1,26 @@
-from schemas import user_create,user_token_validate
-from sqlalchemy import Column, String,Integer,Table,MetaData,create_engine,Select,ForeignKey
-from database import conn,posts_table,Select,find_post_in_db,users_table
-from oauth2 import create_access_token,validate_access_token
+from schemas import vote_schema
+from database import conn,votes_table,find_post_in_db
+from oauth2 import validate_access_token
 from fastapi import Response,status,APIRouter,Header
 #Request from fastAPI contains the JSON data that can be used for retrieving what user had given. This is similar to fetching data from a HTTP_METHOD request in PHP that I worked on storastack
-from bcrypt import gensalt, hashpw
+
 
 votes_router = APIRouter(
     prefix="/votes",
     tags = ["Votes"]
 )
 
-@votes_router.get("/list")
-def data():
-    return {"votes": "Hello"}
-
-@votes_router.post("/vote_post/")
-def data(Authorization: str = Header(default=None), response:str = Response):
+@votes_router.post("/vote_post/",status_code=status.HTTP_200_OK)
+def data(response: Response,Authorization: str = Header(default=None), payload: dict = vote_schema):
     token = Authorization
     if validate_access_token(token)['expire']:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {"Error": "Token Expired."}
     else:
-        select_sql_instruction = Select(posts_table.c.post_title,posts_table.c.post_content).where(posts_table.c.post_owner==validate_access_token(token)['email']).join(users_table)
-        exec_sql = conn.execute(select_sql_instruction).fetchall()
-        return [dict(data._mapping) for data in exec_sql] #convert all the returned data to dict
-    
+        post = find_post_in_db(payload['post_id'],validate_access_token(token)['email'])
+        if isinstance(post,dict):
+            response.status_code = status.HTTP_404_NOT_FOUND
+            return {"msg":"Post Not found"}
+        sql = votes_table.insert().values(post_id=payload['post_id'],user_id=validate_access_token(token)['email'])
+        print(sql)
+        conn.execute(sql)
