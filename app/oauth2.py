@@ -18,7 +18,8 @@ def create_access_token(payload: dict):
 
 def validate_access_token(token: str):
     try:
-        payload = jwt.decode(token,SECRET_KEY,ALGORITHM)
+        extract_jwt_from_header = token.split()[1]
+        payload = jwt.decode(extract_jwt_from_header,SECRET_KEY,ALGORITHM)
         user_email_in_jwt = payload.get('email')
         user_email_in_database = find_user_in_db(user_email_in_jwt)[0]
         token_expire = payload.get("exp")
