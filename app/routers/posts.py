@@ -48,7 +48,7 @@ def create_item(response: Response,post: post_schema, Authorization: str = Heade
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {"Error": "Token Expired."}
     else:
-        insert_sql_statement = posts_table.insert().values(title=post.title,firstname=post.firstname,lastname=post.lastname,content=post.content)
+        insert_sql_statement = posts_table.insert().values(post_title=post.title,post_owner=validate_access_token(token)['email'],post_content=post.content)
         conn.execute(insert_sql_statement)
         if conn.commit() is None:
             return {"msg": "Data inserted successfully"}  
