@@ -15,7 +15,6 @@ posts_router = APIRouter(
 @posts_router.get("/list",status_code=status.HTTP_200_OK)
 def list_posts(response: Response,Authorization: str = Header(default=None)):
     token = Authorization
-    print(validate_access_token(token=token)['email'])
     if validate_access_token(token)['expire']:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {"Error": "Token Expired."}
