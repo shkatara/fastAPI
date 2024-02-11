@@ -19,7 +19,6 @@ def list_posts(response: Response,Authorization: str = Header(default=None)):
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {"Error": "Token Expired."}
     else:
-        result_list = []
         select_sql_instruction = Select(posts_table.c.post_title,posts_table.c.post_content).where(posts_table.c.post_owner==validate_access_token(token)['email']).join(users_table)
         exec_sql = conn.execute(select_sql_instruction).fetchall()
         return [dict(data._mapping) for data in exec_sql] #convert all the returned data to dict

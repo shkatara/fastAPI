@@ -5,7 +5,6 @@ from os import getenv
 
 load_dotenv()
 
-print(getenv("DB_NAME"))
 #create engine for sqlalchemy
 engine = create_engine(f'mysql+pymysql://{getenv("DB_USER")}:{getenv("DB_PASSW")}@{getenv("DB_HOST")}/{getenv("DB_NAME")}')
 
@@ -15,6 +14,7 @@ conn = engine.connect()
 #meta object to hold table metadata
 posts_table_meta = MetaData()
 users_table_meta = MetaData()
+votes_table_meta = MetaData()
 
 
 #define table structure
@@ -35,8 +35,16 @@ posts_table = Table(
     Column('post_content',String(255))
 )
 
+votes_table = Table(
+    'votes',
+    votes_table_meta,
+    Column('user_id',String(255),ForeignKey(users_table.c.email), primary_key=True),
+    Column('post_id',String(255),ForeignKey(posts_table.c.post_owner),  primary_key=True)
+)
+
 users_table_meta.create_all(engine)
 posts_table_meta.create_all(engine)
+votes_table_meta.create_all(engine)
 
 def find_post_in_db(post_id: str, email: str):
     #select_sql_instruction = Select(posts_table.c.post_title,posts_table.c.post_content,posts_table.c.post_owner).where(posts_table.c.id == post_id)
