@@ -39,6 +39,6 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/$image:$tag
+        tags: ${{ secrets.DOCKER_USERNAME }}/${{ env.image }}:${{ env.tag }}
 
         
