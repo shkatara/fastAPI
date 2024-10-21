@@ -8,6 +8,7 @@ on:
       - 'app/**'
       - 'Dockerfile'
       - 'requirements.txt'
+      - '.github/workflows/docker-build.yaml'
   pull_request:
     branches:
       - main
