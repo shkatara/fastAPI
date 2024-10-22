@@ -1,12 +1,14 @@
 from sqlalchemy import Column, String,Integer,Table,MetaData,create_engine,Select,ForeignKey
 from dotenv import load_dotenv
+import sqlite3
 from os import getenv
 #from oauth2 import validate_access_token
 
 load_dotenv()
 
 #create engine for sqlalchemy
-engine = create_engine(f'mysql+pymysql://{getenv("DB_USER")}:{getenv("DB_PASSW")}@{getenv("DB_HOST")}/{getenv("DB_NAME")}')
+#engine = create_engine(f'mysql+pymysql://{getenv("DB_USER")}:{getenv("DB_PASSW")}@{getenv("DB_HOST")}/{getenv("DB_NAME")}')
+engine = create_engine('sqlite:///database.db')
 
 #create connection to mysql
 conn = engine.connect()

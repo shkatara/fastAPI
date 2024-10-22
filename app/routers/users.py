@@ -37,8 +37,8 @@ def userLogin(userdata: user_create,response: Response):
     if isinstance(findUser,dict):
         response.status_code = status.HTTP_404_NOT_FOUND
         return {"msg": "Not Registered"}
-    encoded_hash = findUser[1].encode('utf-8')
-    calc_hash = hashpw(userdata.password.encode('utf-8'),findUser[2].encode('utf-8'))
+    encoded_hash = findUser[1]
+    calc_hash = hashpw(userdata.password.encode('utf-8'),findUser[2])
     if encoded_hash != calc_hash:
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return {"msg": "Invalid Credentials"}
