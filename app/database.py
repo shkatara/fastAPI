@@ -8,7 +8,7 @@ load_dotenv()
 
 #create engine for sqlalchemy
 #engine = create_engine(f'mysql+pymysql://{getenv("DB_USER")}:{getenv("DB_PASSW")}@{getenv("DB_HOST")}/{getenv("DB_NAME")}')
-engine = create_engine('sqlite:///database.db')
+engine = create_engine('sqlite:///database/database.db')
 
 #create connection to mysql
 conn = engine.connect()
